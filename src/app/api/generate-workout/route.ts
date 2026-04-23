@@ -111,11 +111,12 @@ CRITICAL: OUTPUT JSON ONLY. DO NOT output any markdown blocks, conversational te
     // We use llama-3.3-70b-versatile because it is Groq's most capable general logic and JSON output model
     let rawDays: any[] = [];
     
-    for (let attempt = 0; attempt < 2; attempt++) {
+    for (let attempt = 0; attempt < 3; attempt++) {
       const completion = await groq.chat.completions.create({
         messages: [{ role: "user", content: prompt }],
         model: "llama-3.3-70b-versatile",
         temperature: 0.5,
+        max_tokens: 8000,
         response_format: { type: "json_object" },
       });
 
@@ -133,7 +134,7 @@ CRITICAL: OUTPUT JSON ONLY. DO NOT output any markdown blocks, conversational te
     // Attach exercise images (prefer anatomical demos, fallback to free-exercise-db photos)
     const program = rawDays.map((day: any) => {
       const exercises = day.exercises.map((ex: any) => {
-        const demoImages = findAnatomicalDemo(ex.name) || findExerciseImages(ex.name);
+        const demoImages = findAnatomicalDemo(ex.name, ex.targetMuscles) || findExerciseImages(ex.name);
         // Clean up formatting issues sometimes output by Llama 3
         const phaseRaw = (ex.phase || 'main').toLowerCase();
         let phase = 'main';
@@ -142,7 +143,7 @@ CRITICAL: OUTPUT JSON ONLY. DO NOT output any markdown blocks, conversational te
 
         const alternatives = (ex.alternatives || []).map((alt: any) => ({
           ...alt,
-          demoImages: findAnatomicalDemo(alt.name) || findExerciseImages(alt.name),
+          demoImages: findAnatomicalDemo(alt.name, ex.targetMuscles) || findExerciseImages(alt.name),
         }));
         return {
           ...ex,

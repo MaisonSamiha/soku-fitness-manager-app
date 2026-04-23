@@ -92,7 +92,21 @@ export default function ExerciseCard({ exercise, index, isCompleted = false, onT
           </div>
         </div>
         
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexShrink: 0, marginLeft: '12px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '16px', flexShrink: 0, marginLeft: '12px' }}>
+          {exercise.demoImages && (
+            <img 
+              src={exercise.demoImages.image1} 
+              alt={exercise.name}
+              style={{ 
+                width: '64px', 
+                height: '64px', 
+                objectFit: 'cover', 
+                borderRadius: '8px',
+                border: '1px solid var(--surface-border)',
+                background: 'rgba(0,0,0,0.2)'
+              }}
+            />
+          )}
           {expanded ? <ChevronUp size={20} color="var(--text-secondary)" /> : <ChevronDown size={20} color="var(--text-secondary)" />}
         </div>
       </div>

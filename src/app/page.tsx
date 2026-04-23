@@ -306,6 +306,64 @@ export default function Home() {
       {/* Sidebar Form */}
       <div>
         <WorkoutForm onSubmit={generateWorkout} isLoading={isLoading} />
+
+        {/* Saved Programs Library (Always visible in sidebar) */}
+        {!isLoading && savedPrograms.length > 0 && (
+          <div className="glass-panel" style={{ padding: '24px', marginTop: '24px' }}>
+            <h3 style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '16px', fontSize: '1.1rem', fontWeight: 700 }}>
+              <FolderOpen size={20} color="var(--accent-color)" /> My Library
+            </h3>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+              {savedPrograms.map(sp => {
+                const savedDate = new Date(sp.savedAt);
+                const relativeDate = savedDate.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+                const totalEx = sp.program.reduce((s, d) => s + d.exercises.length, 0);
+                const doneCount = sp.completedExercises.length;
+                const progress = totalEx > 0 ? Math.round((doneCount / totalEx) * 100) : 0;
+                const isActive = activeProgramId === sp.id;
+                
+                return (
+                  <div key={sp.id} style={{
+                    display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                    padding: '14px 18px', borderRadius: '12px', cursor: 'pointer',
+                    background: isActive ? 'rgba(139,92,246,0.1)' : 'rgba(255,255,255,0.03)', 
+                    border: isActive ? '1px solid var(--accent-color)' : '1px solid rgba(255,255,255,0.08)',
+                    transition: 'all 0.2s'
+                  }}
+                    onMouseEnter={e => { if(!isActive) { e.currentTarget.style.borderColor = 'var(--accent-color)'; e.currentTarget.style.background = 'rgba(139,92,246,0.06)'; } }}
+                    onMouseLeave={e => { if(!isActive) { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.08)'; e.currentTarget.style.background = 'rgba(255,255,255,0.03)'; } }}
+                    onClick={() => loadSavedProgram(sp)}
+                  >
+                    <div>
+                      <div style={{ fontWeight: 600, marginBottom: '4px', color: isActive ? 'white' : 'inherit' }}>{sp.name}</div>
+                      <div style={{ fontSize: '0.8rem', color: isActive ? 'rgba(255,255,255,0.7)' : 'rgba(255,255,255,0.4)', display: 'flex', gap: '12px' }}>
+                        <span>{relativeDate}</span>
+                        <span>{sp.program.length} days</span>
+                        <span style={{ color: progress === 100 ? '#10b981' : isActive ? 'rgba(255,255,255,0.7)' : 'rgba(255,255,255,0.4)' }}>
+                          {progress}% complete
+                        </span>
+                      </div>
+                    </div>
+                    <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                      {/* Progress bar */}
+                      <div style={{ width: '50px', height: '6px', borderRadius: '3px', background: 'rgba(255,255,255,0.1)', overflow: 'hidden' }}>
+                        <div style={{ width: `${progress}%`, height: '100%', borderRadius: '3px', background: progress === 100 ? '#10b981' : 'var(--accent-color)', transition: 'width 0.3s' }} />
+                      </div>
+                      <button
+                        onClick={(e) => { e.stopPropagation(); deleteSavedProgram(sp.id); }}
+                        style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.25)', cursor: 'pointer', padding: '4px', borderRadius: '6px' }}
+                        onMouseEnter={e => { e.currentTarget.style.color = '#ef4444'; }}
+                        onMouseLeave={e => { e.currentTarget.style.color = 'rgba(255,255,255,0.25)'; }}
+                      >
+                        <Trash2 size={16} />
+                      </button>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Main Content Area */}
@@ -379,60 +437,7 @@ export default function Home() {
           </div>
         )}
 
-        {/* Saved Programs Library */}
-        {!isLoading && !program && savedPrograms.length > 0 && (
-          <div className="glass-panel" style={{ padding: '24px', marginTop: '20px' }}>
-            <h3 style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '16px', fontSize: '1.1rem', fontWeight: 700 }}>
-              <FolderOpen size={20} color="var(--accent-color)" /> My Saved Programs
-            </h3>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-              {savedPrograms.map(sp => {
-                const savedDate = new Date(sp.savedAt);
-                const relativeDate = savedDate.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
-                const totalEx = sp.program.reduce((s, d) => s + d.exercises.length, 0);
-                const doneCount = sp.completedExercises.length;
-                const progress = totalEx > 0 ? Math.round((doneCount / totalEx) * 100) : 0;
-                return (
-                  <div key={sp.id} style={{
-                    display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                    padding: '14px 18px', borderRadius: '12px', cursor: 'pointer',
-                    background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)',
-                    transition: 'all 0.2s'
-                  }}
-                    onMouseEnter={e => { e.currentTarget.style.borderColor = 'var(--accent-color)'; e.currentTarget.style.background = 'rgba(139,92,246,0.06)'; }}
-                    onMouseLeave={e => { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.08)'; e.currentTarget.style.background = 'rgba(255,255,255,0.03)'; }}
-                    onClick={() => loadSavedProgram(sp)}
-                  >
-                    <div>
-                      <div style={{ fontWeight: 600, marginBottom: '4px' }}>{sp.name}</div>
-                      <div style={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.4)', display: 'flex', gap: '12px' }}>
-                        <span>{relativeDate}</span>
-                        <span>{sp.program.length} days</span>
-                        <span style={{ color: progress === 100 ? '#10b981' : 'rgba(255,255,255,0.4)' }}>
-                          {progress}% complete
-                        </span>
-                      </div>
-                    </div>
-                    <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-                      {/* Progress bar */}
-                      <div style={{ width: '60px', height: '6px', borderRadius: '3px', background: 'rgba(255,255,255,0.1)', overflow: 'hidden' }}>
-                        <div style={{ width: `${progress}%`, height: '100%', borderRadius: '3px', background: progress === 100 ? '#10b981' : 'var(--accent-color)', transition: 'width 0.3s' }} />
-                      </div>
-                      <button
-                        onClick={(e) => { e.stopPropagation(); deleteSavedProgram(sp.id); }}
-                        style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.25)', cursor: 'pointer', padding: '4px', borderRadius: '6px' }}
-                        onMouseEnter={e => { e.currentTarget.style.color = '#ef4444'; }}
-                        onMouseLeave={e => { e.currentTarget.style.color = 'rgba(255,255,255,0.25)'; }}
-                      >
-                        <Trash2 size={16} />
-                      </button>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-        )}
+        {/* Saved Programs Library moved to sidebar */}
 
         {!isLoading && program && activeDay && (
           <div className="animate-fade-in" style={{ maxWidth: '100%', minWidth: 0 }}>

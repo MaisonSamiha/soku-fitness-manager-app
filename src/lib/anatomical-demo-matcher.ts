@@ -309,13 +309,15 @@ const DEMO_MAP: Record<string, { start: string; end: string }> = {
   'landmine twist': { start: '/demos/cable_woodchop_0.png', end: '/demos/cable_woodchop_1.png' },
   'pallof press': { start: '/demos/cable_woodchop_0.png', end: '/demos/cable_woodchop_1.png' },
   'cable pallof press': { start: '/demos/cable_woodchop_0.png', end: '/demos/cable_woodchop_1.png' },
+  'cable rotation': { start: '/demos/cable_woodchop_0.png', end: '/demos/cable_woodchop_1.png' },
+  'cable rotations': { start: '/demos/cable_woodchop_0.png', end: '/demos/cable_woodchop_1.png' },
 };
 
 /**
  * Find custom anatomical demo images for an exercise name.
  * Returns image paths or null if no custom demo exists.
  */
-export function findAnatomicalDemo(exerciseName: string): { image0: string; image1: string } | null {
+export function findAnatomicalDemo(exerciseName: string, targetMuscles?: string[]): { image0: string; image1: string } | null {
   const name = exerciseName.toLowerCase()
     .replace(/\(.*?\)/g, '') // Remove parenthetical text e.g. "(Rope Attachment)"
     .replace(/[^a-z\s-]/g, '')
@@ -331,6 +333,22 @@ export function findAnatomicalDemo(exerciseName: string): { image0: string; imag
     if (name.includes(key) || key.includes(name)) {
       return { image0: demo.start, image1: demo.end };
     }
+  }
+
+  // Fallback match based on target muscles
+  if (targetMuscles && targetMuscles.length > 0) {
+    const musclesStr = targetMuscles.join(' ').toLowerCase();
+    
+    if (musclesStr.includes('chest') || musclesStr.includes('pec')) return { image0: '/demos/bench_press_0.png', image1: '/demos/bench_press_1.png' };
+    if (musclesStr.includes('back') || musclesStr.includes('lat')) return { image0: '/demos/row_0.png', image1: '/demos/row_1.png' };
+    if (musclesStr.includes('shoulder') || musclesStr.includes('delt')) return { image0: '/demos/shoulder_press_0.png', image1: '/demos/shoulder_press_1.png' };
+    if (musclesStr.includes('bicep')) return { image0: '/demos/bicep_curl_0.png', image1: '/demos/bicep_curl_1.png' };
+    if (musclesStr.includes('tricep')) return { image0: '/demos/tricep_pushdown_0.png', image1: '/demos/tricep_pushdown_1.png' };
+    if (musclesStr.includes('leg') || musclesStr.includes('quad')) return { image0: '/demos/squat_0.png', image1: '/demos/squat_1.png' };
+    if (musclesStr.includes('hamstring') || musclesStr.includes('glute')) return { image0: '/demos/hip_thrust_0.png', image1: '/demos/hip_thrust_1.png' };
+    if (musclesStr.includes('calf') || musclesStr.includes('calves')) return { image0: '/demos/calf_raise_0.png', image1: '/demos/calf_raise_1.png' };
+    if (musclesStr.includes('core') || musclesStr.includes('ab')) return { image0: '/demos/crunch_0.png', image1: '/demos/crunch_1.png' };
+    if (musclesStr.includes('cardio')) return { image0: '/demos/treadmill_0.png', image1: '/demos/treadmill_1.png' };
   }
 
   return null;
